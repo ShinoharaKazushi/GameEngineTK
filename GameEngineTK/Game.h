@@ -82,4 +82,10 @@ private:
 	//デバッグカメラ
 	std::unique_ptr<DebugCamera> m_debugCamera;
 
+	//エフェクトファクトリ
+	std::unique_ptr < DirectX::EffectFactory>m_factory;
+	//モデル
+	std::unique_ptr<DirectX::Model>m_modelGround;
+	std::unique_ptr<DirectX::Model>m_modelSkydome;
+
 };
