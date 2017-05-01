@@ -64,8 +64,14 @@ void Game::Initialize(HWND window, int width, int height)
 	//テクスチャの読み込みフォルダを指定
 	m_factory->SetDirectory(L"Resources");
 	//モデルの読み込み
-	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(),L"Resources/Ground1m.cmo",*m_factory);
+	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(),L"Resources/Ground200.cmo",*m_factory);
 	m_modelSkydome = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Skydome.cmo", *m_factory);
+	for (int i = 0; i < 20; i++)
+	{
+		m_modelBall[i] = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Ball.cmo", *m_factory);
+	}
+	
+	
 }
 
 // Executes the basic game loop.
@@ -91,6 +97,23 @@ void Game::Update(DX::StepTimer const& timer)
 	m_debugCamera->Update();
 	//デバッグカメラからビュー行列を取得
 	m_view = m_debugCamera->GetCameraMatrix();
+
+	//球のワールド行列を計算
+	//スケーリング行列
+	Matrix scalemat = Matrix::CreateScale(0.5f);
+	//ロール
+	Matrix rotmatZ = Matrix::CreateRotationZ(XMConvertToRadians(15.0f));
+	//ピッチ　仰角
+	Matrix rotmatX = Matrix::CreateRotationX(XMConvertToRadians(15.0f));
+	//ヨー　方位角
+	Matrix rotmatY = Matrix::CreateRotationY(XMConvertToRadians(15.0f));
+	//回転行列の合成
+	Matrix rotmat = rotmatZ * rotmatX * rotmatY;
+	//平行移動行列の合成
+	Matrix transmat = Matrix::CreateTranslation(20.0f, 0.0f, 0.0f);
+	//ワールド行列の合成
+	m_worldBall = scalemat * rotmat * transmat;
+	
 }
 
 // Draws the scene.
@@ -146,9 +169,16 @@ void Game::Render()
 	VertexPositionColor v3(Vector3(-0.5f, -0.5f, 0.5f), Colors::Gold);
 
 	//地面の描画
-	m_modelGround->Draw(m_d3dContext.Get(), *m_states, m_world, m_view, m_proj);
-	m_modelSkydome->Draw(m_d3dContext.Get(), *m_states, m_world, m_view, m_proj);
-
+	m_modelGround->Draw(m_d3dContext.Get(), *m_states, Matrix::Identity, m_view, m_proj);
+	//背景の描画
+	m_modelSkydome->Draw(m_d3dContext.Get(), *m_states, Matrix::Identity, m_view, m_proj);
+	for (int i = 0; i < 20; i++)
+	{
+		//ボールの描画
+		m_modelBall[i]->Draw(m_d3dContext.Get(), *m_states,i *  m_worldBall, m_view, m_proj);
+	}
+	
+	
 	m_batch->DrawTriangle(v1, v2, v3);
 
 	//頂点情報を渡して描画
