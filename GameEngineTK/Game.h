@@ -87,8 +87,10 @@ private:
 	//モデル
 	std::unique_ptr<DirectX::Model>m_modelGround;
 	std::unique_ptr<DirectX::Model>m_modelSkydome;
-	std::unique_ptr<DirectX::Model>m_modelBall[20];
+	std::unique_ptr<DirectX::Model>m_modelBall;
 	//球のワールド行列
-	DirectX::SimpleMath::Matrix m_worldBall;
+	DirectX::SimpleMath::Matrix m_worldBall[20];
+	//角度
+	float m_AngleBall;
 
 };
