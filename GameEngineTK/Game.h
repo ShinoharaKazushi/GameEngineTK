@@ -11,6 +11,7 @@
 #include <Effects.h>
 #include <CommonStates.h>
 #include <Model.h>
+#include <Keyboard.h>
 #include "DebugCamera.h"
 
 
@@ -88,9 +89,20 @@ private:
 	std::unique_ptr<DirectX::Model>m_modelGround;
 	std::unique_ptr<DirectX::Model>m_modelSkydome;
 	std::unique_ptr<DirectX::Model>m_modelBall;
-	//球のワールド行列
+	std::unique_ptr<DirectX::Model>m_modelTeepot;
+	std::unique_ptr<DirectX::Model>m_modelHead;
+	//ワールド行列
 	DirectX::SimpleMath::Matrix m_worldBall[20];
+	DirectX::SimpleMath::Matrix m_worldTeepot[20];
 	//角度
 	float m_AngleBall;
-
+	float m_AngleTank;
+	//キーボード
+	std::unique_ptr<DirectX::Keyboard> keyboard;
+	//自機の座標
+	DirectX::SimpleMath::Vector3 tank_pos;
+	//自機の回転角
+	float tank_angle;
+	//自機のワールド行列
+	DirectX::SimpleMath::Matrix m_worldtank;
 };

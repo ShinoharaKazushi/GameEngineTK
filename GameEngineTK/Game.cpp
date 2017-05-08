@@ -1,4 +1,4 @@
-//
+ï»¿//
 // Game.cpp
 //
 
@@ -56,19 +56,25 @@ void Game::Initialize(HWND window, int width, int height)
 		shaderByteCode, byteCodeLength,
 		m_inputLayout.GetAddressOf());
 
-	//debugƒJƒƒ‰‚Ì¶¬
+	//debugã‚«ãƒ¡ãƒ©ã®ç”Ÿæˆ
 	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth, m_outputHeight);
 
-	//ƒGƒtƒFƒNƒgƒtƒ@ƒNƒgƒŠ‚Ì¶¬
+	//ã‚¨ãƒ•ã‚§ã‚¯ãƒˆãƒ•ã‚¡ã‚¯ãƒˆãƒªã®ç”Ÿæˆ
 	m_factory = std::make_unique<EffectFactory>(m_d3dDevice.Get());
-	//ƒeƒNƒXƒ`ƒƒ‚Ì“Ç‚İ‚İƒtƒHƒ‹ƒ_‚ğw’è
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®èª­ã¿è¾¼ã¿ãƒ•ã‚©ãƒ«ãƒ€ã‚’æŒ‡å®š
 	m_factory->SetDirectory(L"Resources");
-	//ƒ‚ƒfƒ‹‚Ì“Ç‚İ‚İ
+	//ãƒ¢ãƒ‡ãƒ«ã®èª­ã¿è¾¼ã¿
 	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(),L"Resources/Ground200.cmo",*m_factory);
 	m_modelSkydome = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Skydome.cmo", *m_factory);
 	m_modelBall = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Ball.cmo", *m_factory);
-	
+	m_modelTeepot = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Teepot.cmo", *m_factory);
+	m_modelHead = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Head.cmo", *m_factory);
+
 	m_AngleBall = 0;
+
+	keyboard = std::make_unique<Keyboard>();
+
+	tank_angle = 0;
 }
 
 // Executes the basic game loop.
@@ -90,62 +96,126 @@ void Game::Update(DX::StepTimer const& timer)
     // TODO: Add your game logic here.
     elapsedTime;
 
-	//ƒQ[ƒ€‚Ì–ˆƒtƒŒ[ƒ€ˆ—
+	//ã‚²ãƒ¼ãƒ ã®æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‡¦ç†
 	m_debugCamera->Update();
-	//ƒfƒoƒbƒOƒJƒƒ‰‚©‚çƒrƒ…[s—ñ‚ğæ“¾
+	//ãƒ‡ãƒãƒƒã‚°ã‚«ãƒ¡ãƒ©ã‹ã‚‰ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ã‚’å–å¾—
 	m_view = m_debugCamera->GetCameraMatrix();
 
-	//Šp“x‚Ì‰ÁZ
+	//è§’åº¦ã®åŠ ç®—
 	m_AngleBall += 0.5f;
 
-	//‹…‚Ìƒ[ƒ‹ƒhs—ñ‚ğŒvZ
-	for (int i = 0; i < 10; i++)
+	//çƒã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’è¨ˆç®—
+	/*for (int i = 0; i < 10; i++)
 	{
-		//ƒXƒP[ƒŠƒ“ƒOs—ñ
+		//ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°è¡Œåˆ—
 		Matrix scalemat = Matrix::CreateScale(1.0f);
-		//ƒ[ƒ‹
+		//ãƒ­ãƒ¼ãƒ«
 		Matrix rotmatZ = Matrix::CreateRotationZ(XMConvertToRadians(0.0f));
-		//ƒsƒbƒ`@‹ÂŠp
+		//ãƒ”ãƒƒãƒã€€ä»°è§’
 		Matrix rotmatX = Matrix::CreateRotationX(XMConvertToRadians(0.0f));
-		//ƒˆ[@•ûˆÊŠp
+		//ãƒ¨ãƒ¼ã€€æ–¹ä½è§’
 		Matrix rotmatY = Matrix::CreateRotationY(XMConvertToRadians(360.0f/10.0f * i + m_AngleBall));
-		//‰ñ“]s—ñ‚Ì‡¬
+		//å›è»¢è¡Œåˆ—ã®åˆæˆ
 		Matrix rotmat = rotmatZ * rotmatX * rotmatY;
-		//•½sˆÚ“®s—ñ‚Ì‡¬
+		//å¹³è¡Œç§»å‹•è¡Œåˆ—ã®åˆæˆ
 		Matrix transmat = Matrix::CreateTranslation(20.0f, 0.0f, 0.0f);
-		//ƒ[ƒ‹ƒhs—ñ‚Ì‡¬
+		//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã®åˆæˆ
 		m_worldBall[i] = scalemat *transmat*rotmat;
 	}
 	for (int i = 0; i < 10; i++)
 	{
-		//ƒXƒP[ƒŠƒ“ƒOs—ñ
+		//ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°è¡Œåˆ—
 		Matrix scalemat = Matrix::CreateScale(1.0f);
-		//ƒ[ƒ‹
+		//ãƒ­ãƒ¼ãƒ«
 		Matrix rotmatZ = Matrix::CreateRotationZ(XMConvertToRadians(0.0f));
-		//ƒsƒbƒ`@‹ÂŠp
+		//ãƒ”ãƒƒãƒã€€ä»°è§’
 		Matrix rotmatX = Matrix::CreateRotationX(XMConvertToRadians(0.0f));
-		//ƒˆ[@•ûˆÊŠp
+		//ãƒ¨ãƒ¼ã€€æ–¹ä½è§’
 		Matrix rotmatY = Matrix::CreateRotationY(XMConvertToRadians(360.0f / 10.0f * i - m_AngleBall));
-		//‰ñ“]s—ñ‚Ì‡¬
+		//å›è»¢è¡Œåˆ—ã®åˆæˆ
 		Matrix rotmat = rotmatZ * rotmatX * rotmatY;
-		//•½sˆÚ“®s—ñ‚Ì‡¬
+		//å¹³è¡Œç§»å‹•è¡Œåˆ—ã®åˆæˆ
 		Matrix transmat = Matrix::CreateTranslation(40.0f, 0.0f, 0.0f);
-		//ƒ[ƒ‹ƒhs—ñ‚Ì‡¬
+		//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã®åˆæˆ
 		m_worldBall[10+i] = scalemat *transmat*rotmat;
+	}*/
+
+	//ãƒ†ã‚£ãƒ¼ãƒãƒƒãƒˆã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’è¨ˆç®—
+	for (int i = 0; i < 20; i++)
+	{
+	//ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°è¡Œåˆ—
+	Matrix scalemat = Matrix::CreateScale(0.1f);
+	//ãƒ­ãƒ¼ãƒ«
+	Matrix rotmatZ = Matrix::CreateRotationZ(XMConvertToRadians(0.0f));
+	//ãƒ”ãƒƒãƒã€€ä»°è§’
+	Matrix rotmatX = Matrix::CreateRotationX(XMConvertToRadians(0.0f));
+	//ãƒ¨ãƒ¼ã€€æ–¹ä½è§’
+	Matrix rotmatY = Matrix::CreateRotationY(XMConvertToRadians(360.0f/10.0f * i + m_AngleBall));
+	//å›è»¢è¡Œåˆ—ã®åˆæˆ
+	Matrix rotmat = rotmatZ * rotmatX * rotmatY;
+	//å¹³è¡Œç§»å‹•è¡Œåˆ—ã®åˆæˆ
+	Matrix transmat = Matrix::CreateTranslation(20.0f, 0.0f, 0.0f);
+	//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã®åˆæˆ
+	m_worldTeepot[i] = scalemat *rotmat*transmat;
 	}
-	
+
+	//ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã®çŠ¶æ…‹ã‚’å–å¾—
+	Keyboard::State key = keyboard->GetState();
+
+	//Aã‚­ãƒ¼ã‚’æŠ¼ã—ã¦ã„ã‚‹é–“
+	if (key.A)
+	{
+		//è‡ªæ©Ÿã®åº§æ¨™ã‚’ç§»å‹•
+		tank_angle += 0.03f;
+	}
+	//Dã‚­ãƒ¼ã‚’æŠ¼ã—ã¦ã„ã‚‹é–“
+	if (key.D)
+	{
+		//è‡ªæ©Ÿã®åº§æ¨™ã‚’ç§»å‹•
+		tank_angle += -0.03f;
+	}
+	//Wã‚­ãƒ¼ã‚’æŠ¼ã—ã¦ã„ã‚‹é–“
+	if (key.W)
+	{
+		//ç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«
+		Vector3 moveV(0, 0, -0.1f);
+		//è§’åº¦ã«åˆã‚ã›ã¦ç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«ã‚’å›è»¢
+		moveV = Vector3::TransformNormal(moveV, m_worldtank);
+		//è‡ªæ©Ÿã®åº§æ¨™ã‚’ç§»å‹•
+		tank_pos += moveV;
+	}
+	//Sã‚­ãƒ¼ã‚’æŠ¼ã—ã¦ã„ã‚‹é–“
+	if (key.S)
+	{
+		//ç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«
+		Vector3 moveV(0, 0, 0.1f);
+		//è§’åº¦ã«åˆã‚ã›ã¦ç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«ã‚’å›è»¢
+		Matrix rotmat = Matrix::CreateRotationY(tank_angle);
+		moveV = Vector3::TransformNormal(moveV, rotmat);
+		//è‡ªæ©Ÿã®åº§æ¨™ã‚’ç§»å‹•
+		tank_pos += moveV;
+	}
+
+	{//è‡ªæ©Ÿã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã®è¨ˆç®—
+		//å›è»¢è¡Œåˆ—
+		Matrix rotmat = Matrix::CreateRotationY(tank_angle);
+		//å¹³è¡Œç§»å‹•è¡Œåˆ—
+		Matrix transmat = Matrix::CreateTranslation(tank_pos);
+		//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã®åˆæˆ
+		m_worldtank = rotmat*transmat;	
+	}
 }
 
 // Draws the scene.
 void Game::Render()
 {
-	//’¸“_ƒCƒ“ƒfƒbƒNƒX
+	//é ‚ç‚¹ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 	uint16_t indices[] =
 	{
 		0,1,2,
 		2,1,3,
 	};
-	//’¸“_ƒf[ƒ^
+	//é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿
 	VertexPositionNormal vertices[] =
 	{
 		{ Vector3(-1.0f,+1.0f,0.0f),Vector3(0.0f,0.0f,+1.0f) },
@@ -163,7 +233,7 @@ void Game::Render()
     Clear();
 
     // TODO: Add your rendering code here.
-	//•`‰æ‚Í‚±‚±‚É‘‚­
+	//æç”»ã¯ã“ã“ã«æ›¸ã
 	m_states = std::make_unique<CommonStates>(m_d3dDevice.Get());
 	m_d3dContext->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
 	m_d3dContext->OMSetDepthStencilState(m_states->DepthNone(), 0);
@@ -171,6 +241,7 @@ void Game::Render()
 
 	/*m_view = Matrix::CreateLookAt(Vector3(2.f, 2.f, 2.f),
 		Vector3(0,0,0), Vector3(1,0,0));*/
+
 	m_proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f,
 		float(m_outputWidth) / float(m_outputHeight), 0.1f, 500.f);
 
@@ -188,26 +259,34 @@ void Game::Render()
 	VertexPositionColor v2(Vector3(0.5f, -0.5f, 0.5f), Colors::Chartreuse);
 	VertexPositionColor v3(Vector3(-0.5f, -0.5f, 0.5f), Colors::Gold);
 
-	//’n–Ê‚Ì•`‰æ
+	//åœ°é¢ã®æç”»
 	m_modelGround->Draw(m_d3dContext.Get(), *m_states, Matrix::Identity, m_view, m_proj);
-	//”wŒi‚Ì•`‰æ
+	//èƒŒæ™¯ã®æç”»
 	m_modelSkydome->Draw(m_d3dContext.Get(), *m_states, Matrix::Identity, m_view, m_proj);
+	//ãƒœãƒ¼ãƒ«ã‚’20å€‹æç”»
+	/*for (int i = 0; i < 20; i++)
+	{
+		//ãƒœãƒ¼ãƒ«ã®æç”»
+		m_modelBall->Draw(m_d3dContext.Get(), *m_states, m_worldBall[i], m_view, m_proj);
+	}*/
+	//ãƒ†ã‚£ãƒ¼ãƒãƒƒãƒˆã‚’20å€‹æç”»
 	for (int i = 0; i < 20; i++)
 	{
-		//ƒ{[ƒ‹‚Ì•`‰æ
-		m_modelBall->Draw(m_d3dContext.Get(), *m_states, m_worldBall[i], m_view, m_proj);
+		//ãƒ†ã‚£ãƒ¼ãƒãƒƒãƒˆã®æç”»
+		m_modelTeepot->Draw(m_d3dContext.Get(), *m_states, m_worldTeepot[i], m_view, m_proj);
 	}
-	
-	
+	//é ­éƒ¨ã®æç”»
+	m_modelHead->Draw(m_d3dContext.Get(), *m_states, m_worldtank, m_view, m_proj);
+
 	m_batch->DrawTriangle(v1, v2, v3);
 
-	//’¸“_î•ñ‚ğ“n‚µ‚Ä•`‰æ
+	//é ‚ç‚¹æƒ…å ±ã‚’æ¸¡ã—ã¦æç”»
 	//m_batch->DrawIndexed(D3D_PRIMITIVE_TOPOLOGY_TRIANGLEIST, indices, 6, vertices,4);
 
 	m_batch->End();
 
     Present();
-	//–ˆƒtƒŒ[ƒ€ˆ—
+	//æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‡¦ç†
 }
 
 // Helper method to clear the back buffers.
