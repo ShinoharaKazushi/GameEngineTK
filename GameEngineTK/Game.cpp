@@ -6,6 +6,7 @@
 #include "pch.h"
 #include "Game.h"
 
+
 extern void ExitGame();
 
 using namespace DirectX;
@@ -75,6 +76,8 @@ void Game::Initialize(HWND window, int width, int height)
 	keyboard = std::make_unique<Keyboard>();
 
 	tank_angle = 0;
+	//カメラの生成
+	m_Camera = std::make_unique<FollowCamera>(m_outputWidth,m_outputHeight);
 }
 
 // Executes the basic game loop.
@@ -204,6 +207,15 @@ void Game::Update(DX::StepTimer const& timer)
 		//ワールド行列の合成
 		m_worldtank = rotmat*transmat;	
 	}
+
+
+	{//追従カメラ
+		m_Camera->SetTargetPos(tank_pos);
+		m_Camera->SetTargetAngle(tank_angle);
+		m_Camera->Update();
+		m_view = m_Camera->GetViewMatrix();
+		m_proj = m_Camera->GetProjectionMatrix();
+	}
 }
 
 // Draws the scene.
@@ -242,6 +254,10 @@ void Game::Render()
 	/*m_view = Matrix::CreateLookAt(Vector3(2.f, 2.f, 2.f),
 		Vector3(0,0,0), Vector3(1,0,0));*/
 
+	//デバッグカメラからビュー行列を取得
+	//m_view = m_debugCamera->GetCameraMatrix();
+
+	//射影行列の生成
 	m_proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f,
 		float(m_outputWidth) / float(m_outputHeight), 0.1f, 500.f);
 
