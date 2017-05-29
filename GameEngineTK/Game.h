@@ -14,6 +14,8 @@
 #include <Keyboard.h>
 #include "DebugCamera.h"
 #include "FollowCamera.h"
+#include "Obj3d.h"
+#include <vector>
 
 
 // A basic game implementation that creates a D3D11 device and
@@ -21,7 +23,16 @@
 class Game
 {
 public:
+	enum PLAYER_PARTS {
+		PLAYER_PARTS_ASHI,
+		PLAYER_PARTS_BODY,
+		PLAYER_PARTS_HAND_L,
+		PLAYER_PARTS_HAND_R,
+		PLAYER_PARTS_TURRET,
+		PLAYER_PARTS_HEAD,
 
+		PLAYER_PARTS_NUM,
+	};
     Game();
 
     // Initialization and management
@@ -87,11 +98,11 @@ private:
 	//エフェクトファクトリ
 	std::unique_ptr < DirectX::EffectFactory>m_factory;
 	//モデル
-	std::unique_ptr<DirectX::Model>m_modelGround;
-	std::unique_ptr<DirectX::Model>m_modelSkydome;
-	std::unique_ptr<DirectX::Model>m_modelBall;
+	Obj3d m_objGround;
+	Obj3d m_objSkydome;
+	std::unique_ptr<DirectX::Model> m_objBall;
 	std::unique_ptr<DirectX::Model>m_modelTeepot;
-	std::unique_ptr<DirectX::Model>m_modelHead;
+	//std::unique_ptr<DirectX::Model>m_modelHead;
 	//ワールド行列
 	DirectX::SimpleMath::Matrix m_worldBall[20];
 	DirectX::SimpleMath::Matrix m_worldTeepot[20];
@@ -104,8 +115,13 @@ private:
 	DirectX::SimpleMath::Vector3 tank_pos;
 	//自機の回転角
 	float tank_angle;
-	//自機のワールド行列
-	DirectX::SimpleMath::Matrix m_worldtank;
+
+	// 自機のギミックに使う角度
+	float m_sinAngle;
+	
+	//自機のオブジェクト
+	std::vector<Obj3d> m_Obj3dPlayer;
+
 	//カメラ
 	std::unique_ptr<FollowCamera> m_Camera;
 
