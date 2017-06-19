@@ -38,6 +38,7 @@ void Player::Initialize()
 	m_Obj[PARTS_TURRET_L].LoadModel(L"Resources/turret.cmo");
 	m_Obj[PARTS_TURRET_R].LoadModel(L"Resources/turret.cmo");
 	m_Obj[PARTS_HEAD].LoadModel(L"Resources/Head.cmo");
+	m_Obj[PARTS_BALL].LoadModel(L"Resources/boll.cmo");
 
 	//親子関係の構築(子供に親をセット)
 	m_Obj[PARTS_BODY].SetObjParent(&m_Obj[PARTS_ASHI]);
@@ -47,6 +48,7 @@ void Player::Initialize()
 	m_Obj[PARTS_HAND_R].SetObjParent(&m_Obj[PARTS_BODY]);
 	m_Obj[PARTS_TURRET_L].SetObjParent(&m_Obj[PARTS_HAND_L]);
 	m_Obj[PARTS_TURRET_R].SetObjParent(&m_Obj[PARTS_HAND_R]);
+	m_Obj[PARTS_BALL].SetObjParent(&m_Obj[PARTS_TURRET_R]);
 	
 	//親からのオフセット(ローカルの座標ずれ)
 	m_Obj[PARTS_BODY].SetTranslation(Vector3(0, 0.4f, 0.1f));
@@ -64,6 +66,9 @@ void Player::Initialize()
 	m_Obj[PARTS_TURRET_L].SetTranslation(Vector3(-0.2, 0.2f, 0));
 
 	m_Obj[PARTS_TURRET_R].SetTranslation(Vector3(0.2, 0.2f, 0));
+
+	m_Obj[PARTS_BALL].SetTranslation(Vector3(0, 0.3f, -1));
+	m_Obj[PARTS_BALL].SetScale(Vector3(0.3f, 0.3f, 0.3f));
 }
 
 //-----------------------------------------------------------------------------
@@ -81,7 +86,7 @@ void Player::Update()
 
 		angle = m_Obj[PARTS_ENGINE].GetRotation();
 		m_Obj[PARTS_ENGINE].SetRotation(
-			angle + Vector3(0, 0, 0.2));
+			angle + Vector3(0, 0, 0.1));
 
 		// サインの引数の角度がだんだん増える
 		m_sinAngle += 0.1f;
@@ -117,7 +122,6 @@ void Player::Update()
 	{
 		// 移動ベクトル
 		Vector3 moveV(0, 0, -0.1f);
-		// 今の角度に合わせて移動ベクトルを回転
 		// 回転行列
 		float angle = m_Obj[0].GetRotation().y;
 		Matrix rotmat = Matrix::CreateRotationY(angle);
@@ -126,6 +130,11 @@ void Player::Update()
 		Vector3 pos = m_Obj[0].GetTranslation();
 		pos += moveV;
 		m_Obj[0].SetTranslation(pos);
+
+		Vector3 angleE;
+		angleE = m_Obj[PARTS_ENGINE].GetRotation();
+		m_Obj[PARTS_ENGINE].SetRotation(
+			angleE + Vector3(0, 0, 0.4));
 		
 	}
 
@@ -142,6 +151,11 @@ void Player::Update()
 		Vector3 pos = m_Obj[0].GetTranslation();
 		pos += moveV;
 		m_Obj[0].SetTranslation(pos);
+
+		Vector3 angleE;
+		angleE = m_Obj[PARTS_ENGINE].GetRotation();
+		m_Obj[PARTS_ENGINE].SetRotation(
+			angleE + Vector3(0, 0, -0.4));
 	}
 
 	// 弾丸が進む処理
@@ -158,9 +172,9 @@ void Player::Update()
 	if (m_FireFlag)
 	{
 		// 自機の座標を移動
-		Vector3 pos = m_Obj[PARTS_HEAD].GetTranslation();
+		Vector3 pos = m_Obj[PARTS_BALL].GetTranslation();
 		pos += m_BulletVel;
-		m_Obj[PARTS_HEAD].SetTranslation(pos);
+		m_Obj[PARTS_BALL].SetTranslation(pos);
 	}
 
 	// 行列更新
@@ -201,7 +215,7 @@ void Player::FireBullet()
 	m_FireFlag = true;
 
 	// ワールド行列を取得
-	Matrix worldm = m_Obj[PARTS_HEAD].GetWorld();
+	Matrix worldm = m_Obj[PARTS_BALL].GetWorld();
 
 	Vector3 scale;	// ワールドスケーリング
 	Quaternion rotation;	// ワールド回転
@@ -211,10 +225,10 @@ void Player::FireBullet()
 	worldm.Decompose(scale, rotation, translation);
 
 	// 親子関係を解除してパーツを独立させる
-	m_Obj[PARTS_HEAD].SetObjParent(nullptr);
-	m_Obj[PARTS_HEAD].SetScale(scale);
-	m_Obj[PARTS_HEAD].SetRotationQ(rotation);
-	m_Obj[PARTS_HEAD].SetTranslation(translation);
+	m_Obj[PARTS_BALL].SetObjParent(nullptr);
+	m_Obj[PARTS_BALL].SetScale(scale);
+	m_Obj[PARTS_BALL].SetRotationQ(rotation);
+	m_Obj[PARTS_BALL].SetTranslation(translation);
 
 	// 弾の速度を設定
 	m_BulletVel = Vector3(0, 0, -0.1f);
@@ -226,9 +240,9 @@ void Player::ResetBullet()
 {
 	if (!m_FireFlag) return;
 	Quaternion rotation;	// ワールド回転
-	m_Obj[PARTS_HEAD].SetRotationQ(rotation);
-	m_Obj[PARTS_HEAD].SetObjParent(&m_Obj[PARTS_BODY]);
-	m_Obj[PARTS_HEAD].SetTranslation(Vector3(0, 0.5f, 0));
+	m_Obj[PARTS_BALL].SetRotationQ(rotation);
+	m_Obj[PARTS_BALL].SetObjParent(&m_Obj[PARTS_TURRET_R]);
+	m_Obj[PARTS_BALL].SetTranslation(Vector3(0, 0.3f, -1));
 
 	m_FireFlag = false;
 }
