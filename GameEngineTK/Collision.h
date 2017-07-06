@@ -33,4 +33,15 @@ public:
 	DirectX::SimpleMath::Vector3 End;
 };
 
-bool CheckSphere2Sphere(const Sphere & sphereA, const Sphere & sphereB);
+//法線付き三角形(反時計回りが表面)
+class Triangle{
+public:
+	DirectX::SimpleMath::Vector3	P0;
+	DirectX::SimpleMath::Vector3	P1;
+	DirectX::SimpleMath::Vector3	P2;
+	DirectX::SimpleMath::Vector3	Normal;	// 法線ベクトル
+};
+bool CheckSegment2Triangle(const Segment& _segment, const Triangle& _triangle, DirectX::SimpleMath::Vector3 *_inter = nullptr);	// 線分と法線付き三角形
+bool CheckSphere2Triangle(const Sphere& _sphere, const Triangle& _triangle, DirectX::SimpleMath::Vector3 *_inter = nullptr); //球と法線付き三角形の当たりチェック
+void ComputeTriangle(const DirectX::SimpleMath::Vector3& _p0, const DirectX::SimpleMath::Vector3& _p1, const DirectX::SimpleMath::Vector3& _p2, Triangle* _triangle);
+bool CheckSphere2Sphere(const Sphere & sphereA, const Sphere & sphereB, DirectX::SimpleMath::Vector3* _inter = nullptr);

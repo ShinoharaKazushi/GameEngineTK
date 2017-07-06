@@ -69,6 +69,20 @@ void Player::Initialize()
 
 	m_Obj[PARTS_BALL].SetTranslation(Vector3(0, 0.3f, -1));
 	m_Obj[PARTS_BALL].SetScale(Vector3(0.3f, 0.3f, 0.3f));
+
+	//発射中ではない
+	m_FireFlag = false;
+
+	//武器のあたり判定ノード設定
+	{
+		m_CollisionNodeBullet.Initialize();
+		//武器パーツにぶら下げる
+		m_CollisionNodeBullet.SetParent(&m_Obj[PARTS_BALL]);
+		//武器パーツからのオフセット
+		m_CollisionNodeBullet.SetTrans(Vector3(0, 0, 0));
+		//あたり判定の半径
+		m_CollisionNodeBullet.SetLocalRadius(0.3f);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -135,7 +149,6 @@ void Player::Update()
 		angleE = m_Obj[PARTS_ENGINE].GetRotation();
 		m_Obj[PARTS_ENGINE].SetRotation(
 			angleE + Vector3(0, 0, 0.4));
-		
 	}
 
 	// Sキーを押している間
@@ -156,6 +169,20 @@ void Player::Update()
 		angleE = m_Obj[PARTS_ENGINE].GetRotation();
 		m_Obj[PARTS_ENGINE].SetRotation(
 			angleE + Vector3(0, 0, -0.4));
+	}
+	if (keystate.Left)
+	{
+		Vector3 angleH;
+		angleH = m_Obj[PARTS_TURRET_R].GetRotation();
+		m_Obj[PARTS_TURRET_R].SetRotation(
+			angleH + Vector3(0, 0.05, 0));
+	}
+	if (keystate.Right)
+	{
+		Vector3 angleH;
+		angleH = m_Obj[PARTS_TURRET_R].GetRotation();
+		m_Obj[PARTS_TURRET_R].SetRotation(
+			angleH + Vector3(0, -0.05, 0));
 	}
 
 	// 弾丸が進む処理
@@ -193,6 +220,8 @@ void Player::Calc()
 	{
 		it->Update();
 	}
+	//ノード更新
+	m_CollisionNodeBullet.Update();
 }
 
 //-----------------------------------------------------------------------------
@@ -206,6 +235,8 @@ void Player::Draw()
 	{
 		it->Draw();
 	}
+	//
+	m_CollisionNodeBullet.Draw();
 }
 
 void Player::FireBullet()
@@ -231,7 +262,7 @@ void Player::FireBullet()
 	m_Obj[PARTS_BALL].SetTranslation(translation);
 
 	// 弾の速度を設定
-	m_BulletVel = Vector3(0, 0, -0.1f);
+	m_BulletVel = Vector3(0, 0, -0.3f);
 	// 弾の向きに合わせて進行方向を回転
 	m_BulletVel = Vector3::Transform(m_BulletVel, rotation);
 }

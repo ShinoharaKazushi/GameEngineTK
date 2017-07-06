@@ -14,6 +14,8 @@ Microsoft::WRL::ComPtr<ID3D11Device>            Obj3d::m_d3dDevice;
 Microsoft::WRL::ComPtr<ID3D11DeviceContext>     Obj3d::m_d3dContext;
 // エフェクトファクトリ
 std::unique_ptr<DirectX::EffectFactory> Obj3d::m_factory;
+//
+ID3D11BlendState* Obj3d::s_pBlendStateSubtract;
 
 
 void Obj3d::InitializeStatic(Camera * pCamera, Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice, Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3dContext)
@@ -30,6 +32,13 @@ void Obj3d::InitializeStatic(Camera * pCamera, Microsoft::WRL::ComPtr<ID3D11Devi
 	// テクスチャの読み込みフォルダを指定
 	m_factory->SetDirectory(L"Resources");
 }
+
+void Obj3d::SetSubtractive()
+{
+	// 減算描画を設定
+	m_d3dContext->OMSetBlendState(s_pBlendStateSubtract, nullptr, 0xffffff);
+}
+
 
 Obj3d::Obj3d()
 {
@@ -79,6 +88,80 @@ void Obj3d::Update()
 	}
 }
 
+/**
+*	@brief オブジェクトのライティングを無効にする
+*/
+void Obj3d::DisableLighting()
+{
+	if (m_model)
+	{
+		// モデル内の全メッシュ分回す
+		ModelMesh::Collection::const_iterator it_mesh = m_model->meshes.begin();
+		for (; it_mesh != m_model->meshes.end(); it_mesh++)
+		{
+			ModelMesh* modelmesh = it_mesh->get();
+			assert(modelmesh);
+
+			// メッシュ内の全メッシュパーツ分回す
+			std::vector<std::unique_ptr<ModelMeshPart>>::iterator it_meshpart = modelmesh->meshParts.begin();
+			for (; it_meshpart != modelmesh->meshParts.end(); it_meshpart++)
+			{
+				ModelMeshPart* meshpart = it_meshpart->get();
+				assert(meshpart);
+
+				// メッシュパーツにセットされたエフェクトをBasicEffectとして取得
+				std::shared_ptr<IEffect> ieff = meshpart->effect;
+				BasicEffect* eff = dynamic_cast<BasicEffect*>(ieff.get());
+				if (eff != nullptr)
+				{
+					// 自己発光を最大値に
+					eff->SetEmissiveColor(Vector3(1, 1, 1));
+
+					// エフェクトに含む全ての平行光源分について処理する
+					for (int i = 0; i < BasicEffect::MaxDirectionalLights; i++)
+					{
+						// ライトを無効にする
+						eff->SetLightEnabled(i, false);
+					}
+				}
+			}
+		}
+	}
+}
+
+void Obj3d::Calc()
+{
+	Matrix scalem;
+	Matrix rotm;
+	Matrix transm;
+
+	scalem = Matrix::CreateScale(m_scale);
+
+	if (m_UseQuternion)
+	{
+		rotm = Matrix::CreateFromQuaternion(m_rotationQ);
+	}
+	else
+	{
+		rotm = Matrix::CreateFromYawPitchRoll(m_rotation.y, m_rotation.x, m_rotation.z);
+	}
+
+	transm = Matrix::CreateTranslation(m_translation);
+
+	// ワールド行列をSRTの順に合成
+	m_world = Matrix::Identity;
+	m_world *= scalem;
+	m_world *= rotm;
+	m_world *= transm;
+
+	// 親行列があれば
+	if (m_pObjParent)
+	{
+		// 親行列を掛ける
+		m_world = m_world * m_pObjParent->GetWorld();
+	}
+}
+
 void Obj3d::Draw()
 {
 	// モデルを描画
@@ -91,3 +174,19 @@ void Obj3d::Draw()
 			m_pCamera->GetProj());
 	}
 }
+
+//void Obj3d::DrawSubtractive()
+//{
+//	if (m_model)
+//	{
+//		assert(s_pCamera);
+//		const Matrix& view = m_pCamera->GetView();
+//		const Matrix& projection = m_pCamera->GetProj();
+//
+//		assert(s_pDeviceContext);
+//		assert(s_pStates);
+//
+//		// 減算描画用の設定関数を渡して描画
+//		m_model->Draw(m_d3dContext.Get(), *m_states, m_world, view, projection, false, Obj3d::SetSubtractive);
+//	}
+//}

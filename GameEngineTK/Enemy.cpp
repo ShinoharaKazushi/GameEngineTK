@@ -75,6 +75,16 @@ void Enemy::Initialize()
 	m_Timer = 0;
 	m_DistAngle = 0;
 
+	//武器のあたり判定ノード設定
+	{
+		m_CollisionNodeBody.Initialize();
+		//武器パーツにぶら下げる
+		m_CollisionNodeBody.SetParent(&m_Obj[PARTS_BODY]);
+		//武器パーツからのオフセット
+		m_CollisionNodeBody.SetTrans(Vector3(0, 0.5f, 0));
+		//あたり判定の半径
+		m_CollisionNodeBody.SetLocalRadius(1.0f);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -169,6 +179,8 @@ void Enemy::Calc()
 	{
 		it->Update();
 	}
+	//ノード更新
+	m_CollisionNodeBody.Update();
 }
 
 //-----------------------------------------------------------------------------
@@ -182,6 +194,8 @@ void Enemy::Draw()
 	{
 		it->Draw();
 	}
+	//
+	m_CollisionNodeBody.Draw();
 }
 
 const DirectX::SimpleMath::Vector3& Enemy::GetTrans()

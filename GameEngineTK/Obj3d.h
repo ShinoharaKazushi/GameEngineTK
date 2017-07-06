@@ -10,6 +10,7 @@
 #include <CommonStates.h>
 #include <SimpleMath.h>
 #include <Model.h>
+#include <map>
 
 #include "Camera.h"
 
@@ -21,7 +22,8 @@ public:
 	static void InitializeStatic(Camera* pCamera,
 		Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice,
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3dContext);
-
+		// 減算描画設定をセット
+		static void SetSubtractive();
 private:
 	// カメラ
 	static Camera* m_pCamera;
@@ -35,6 +37,7 @@ private:
 	static std::unique_ptr<DirectX::EffectFactory> m_factory;
 
 	//static std::map<DirectX::Model, wstring> m_models;
+	static ID3D11BlendState* s_pBlendStateSubtract;
 
 public:
 	// コンストラクタ
@@ -44,8 +47,14 @@ public:
 	void LoadModel(const wchar_t* fileName);
 
 	void Update();
+	// 行列の計算
+	void Calc();
 
 	void Draw();
+	// 減算描画での描画（影用）
+	void DrawSubtractive();
+	// オブジェクトのライティングを無効にする
+	void DisableLighting();
 
 	// setter
 	// スケーリング用
@@ -56,6 +65,8 @@ public:
 	void SetRotationQ(const DirectX::SimpleMath::Quaternion& rotation) { m_rotationQ = rotation; m_UseQuternion = true; }
 	// 平行移動用
 	void SetTranslation(const DirectX::SimpleMath::Vector3& translation) { m_translation = translation; }
+	//ワールド行列用
+	void SetWorld(const DirectX::SimpleMath::Matrix& world) { m_world = world; }
 	// 親行列用
 	void SetObjParent(Obj3d* pObjParent) { m_pObjParent = pObjParent; }
 	// getter

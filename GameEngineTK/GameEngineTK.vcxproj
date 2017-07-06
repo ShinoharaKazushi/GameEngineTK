@@ -168,10 +168,14 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="CollisionNode.h" />
     <ClInclude Include="DebugCamera.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="FollowCamera.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="LandShape.h" />
+    <ClInclude Include="LandShapeData.h" />
+    <ClInclude Include="ModelEffect.h" />
     <ClInclude Include="Obj3d.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Player.h" />
@@ -180,11 +184,15 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="CollisionNode.cpp" />
     <ClCompile Include="DebugCamera.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="FollowCamera.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="LandShape.cpp" />
+    <ClCompile Include="LandShapeData.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="ModelEffect.cpp" />
     <ClCompile Include="Obj3d.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -219,7 +227,9 @@
     <MeshContentTask Include="Assets\hand.FBX" />
     <MeshContentTask Include="Assets\handr.FBX" />
     <MeshContentTask Include="Assets\Head.FBX" />
+    <MeshContentTask Include="Assets\HitEffect.FBX" />
     <MeshContentTask Include="Assets\Skydome.FBX" />
+    <MeshContentTask Include="Assets\SphereNode.FBX" />
     <MeshContentTask Include="Assets\Teepot.FBX" />
     <MeshContentTask Include="Assets\turret.FBX" />
   </ItemGroup>
